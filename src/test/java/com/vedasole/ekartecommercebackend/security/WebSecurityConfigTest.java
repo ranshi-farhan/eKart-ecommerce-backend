@@ -54,7 +54,7 @@ class WebSecurityConfigTest {
                         .header("Authorization",
                                 "Bearer " + testApplicationInitializer.getAdminToken()))
                 // We only care that ADMIN is allowed past security
-                .andExpect(status().isNotUnauthorized())
-                .andExpect(status().isNotForbidden());
+                .andExpect(status().is2xxSuccessful());
+
     }
 }
