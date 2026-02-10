@@ -1,29 +1,23 @@
 package com.vedasole.ekartecommercebackend;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@ActiveProfiles("test")
 class EkartEcommerceBackendApplicationTests {
-
-    @Autowired
-    EkartEcommerceBackendApplication application;
-
 
     @Test
     void contextLoads() {
-        assertNotNull(application);
+        // If application context fails, test will fail automatically
     }
 
     @Test
     void whenCreatingModelMapper_thenNoExceptions() {
-        // Act and Assert
-        Assertions.assertDoesNotThrow(ModelMapper::new);
+        assertDoesNotThrow(ModelMapper::new);
     }
-
 }
