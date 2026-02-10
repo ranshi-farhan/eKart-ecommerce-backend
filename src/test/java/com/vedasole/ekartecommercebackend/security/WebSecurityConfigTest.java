@@ -1,6 +1,6 @@
 package com.vedasole.ekartecommercebackend.security;
 
-import com.vedasole.ekartecommercebackend.util.TestApplicationInitializer;
+import com.vedasole.ekartecommercebackend.utility.TestApplicationInitializer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
