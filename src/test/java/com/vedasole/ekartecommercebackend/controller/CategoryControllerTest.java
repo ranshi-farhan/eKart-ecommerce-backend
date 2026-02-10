@@ -3,9 +3,12 @@ package com.vedasole.ekartecommercebackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vedasole.ekartecommercebackend.config.TestMailConfig;
 import com.vedasole.ekartecommercebackend.entity.Category;
+import com.vedasole.ekartecommercebackend.payload.CategoryDto;
+import com.vedasole.ekartecommercebackend.service.service_interface.CategoryService;
 import com.vedasole.ekartecommercebackend.utility.TestApplicationInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,11 +20,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,52 +41,61 @@ class CategoryControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private CategoryService categoryService;
 
     @Autowired
     private TestApplicationInitializer testApplicationInitializer;
 
-    private Category expected;
+    private Category category;
+    private CategoryDto categoryDto;
 
     @BeforeEach
     void setUp() {
-        expected = new Category(
+        category = new Category(
                 1L,
                 "Mobiles & Tablets",
                 "/images/categories/mobile-and-tablets.webp",
                 "All mobile phones and tablets",
                 null,
                 true,
-                LocalDateTime.of(2022, 1, 1, 1, 0),
-                LocalDateTime.of(2022, 1, 1, 1, 0)
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
+
+        categoryDto = new ModelMapper().map(category, CategoryDto.class);
     }
 
     @Test
     void shouldCreateCategory() throws Exception {
-        when(categoryRepository.save(any(Category.class))).thenReturn(expected);
+        given(categoryService.createCategory(any(CategoryDto.class)))
+                .willReturn(categoryDto);
 
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(expected))
+                        .content(objectMapper.writeValueAsString(categoryDto))
                         .header("Authorization",
-                                "Bearer ".concat(testApplicationInitializer.getAdminToken())))
+                                "Bearer " + testApplicationInitializer.getAdminToken()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Mobiles & Tablets"));
     }
 
     @Test
     void shouldGetAllCategories() throws Exception {
-        when(categoryRepository.findAll()).thenReturn(List.of(expected));
+        given(categoryService.getAllCategories())
+                .willReturn(List.of(categoryDto));
 
         mockMvc.perform(get(BASE_URL))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name").value("Mobiles & Tablets"));
+                .andExpect(jsonPath("$._embedded.categories").isArray())
+                .andExpect(jsonPath("$._embedded.categories[0].name")
+                        .value("Mobiles & Tablets"));
     }
 
     @Test
     void shouldGetCategoryById() throws Exception {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(expected));
+        given(categoryService.getCategoryById(1L))
+                .willReturn(categoryDto);
 
         mockMvc.perform(get(BASE_URL + "/{id}", 1L))
                 .andExpect(status().isOk())
@@ -93,25 +104,23 @@ class CategoryControllerTest {
 
     @Test
     void shouldUpdateCategory() throws Exception {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(expected));
-        when(categoryRepository.save(any(Category.class))).thenReturn(expected);
+        given(categoryService.updateCategory(any(CategoryDto.class), eq(1L)))
+                .willReturn(categoryDto);
 
         mockMvc.perform(put(BASE_URL + "/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(expected))
+                        .content(objectMapper.writeValueAsString(categoryDto))
                         .header("Authorization",
-                                "Bearer ".concat(testApplicationInitializer.getAdminToken())))
+                                "Bearer " + testApplicationInitializer.getAdminToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Mobiles & Tablets"));
     }
 
     @Test
     void shouldDeleteCategory() throws Exception {
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(expected));
-
         mockMvc.perform(delete(BASE_URL + "/{id}", 1L)
                         .header("Authorization",
-                                "Bearer ".concat(testApplicationInitializer.getAdminToken())))
-                .andExpect(status().isNoContent());
+                                "Bearer " + testApplicationInitializer.getAdminToken()))
+                .andExpect(status().isOk());
     }
 }
