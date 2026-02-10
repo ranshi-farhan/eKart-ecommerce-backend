@@ -3,7 +3,6 @@ package com.vedasole.ekartecommercebackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vedasole.ekartecommercebackend.config.TestMailConfig;
 import com.vedasole.ekartecommercebackend.entity.Category;
-import com.vedasole.ekartecommercebackend.repository.CategoryRepository;
 import com.vedasole.ekartecommercebackend.utility.TestApplicationInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,8 +39,6 @@ class CategoryControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private CategoryRepository categoryRepository;
 
     @Autowired
     private TestApplicationInitializer testApplicationInitializer;
